@@ -8,8 +8,10 @@ app:
     max-pool-size: 100
 
 spring:
-  profiles:
-    include: prod
+  datasource:
+    url: jdbc:postgresql://localhost:5432/jira
+    username: ${POSTGRES_USER}
+    password: ${POSTGRES_PASSWORD}
   jpa:
     show-sql: true
     open-in-view: false
@@ -28,6 +30,7 @@ spring:
 
   liquibase:
     changeLog: "classpath:db/changelog.sql"
+    enabled: true
 
   # Jackson Fields Serialization
   jackson:
@@ -42,10 +45,51 @@ spring:
     cache-names: users
     caffeine.spec: maximumSize=10000,expireAfterAccess=5m
 
+  security:
+    oauth2:
+      client:
+        registration:
+          github:
+            client-id: ${GITHUB_OAUTH_CLIENT_ID}
+            client-secret: ${GITHUB_OAUTH_CLIENT_SECRET}
+            scope:
+              - email
+          google:
+            client-id: ${GOOGLE_OAUTH_CLIENT_ID}
+            client-secret: ${GOOGLE_OAUTH_CLIENT_SECRET}
+            scope:
+              - email
+              - profile
+          gitlab:
+            client-id: ${GITLAB_OAUTH_CLIENT_ID}
+            client-secret: ${GITLAB_OAUTH_CLIENT_SECRET}
+            client-name: GitLab
+            redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
+            authorization-grant-type: authorization_code
+            scope: read_user
+        provider:
+          gitlab:
+            authorization-uri: https://gitlab.com/oauth/authorize
+            token-uri: https://gitlab.com/oauth/token
+            user-info-uri: https://gitlab.com/api/v4/user
+            user-name-attribute: email
+
   sql:
     init:
       mode: always
   thymeleaf.check-template-location: false
+
+  mail:
+    properties:
+      mail:
+        smtp:
+          starttls:
+            enable: true
+          auth: true
+    host: smtp.gmail.com
+    username: ${EMAIL_USERNAME}
+    password: ${EMAIL_PASSWORD}
+    port: 587
 
 logging:
   level:
