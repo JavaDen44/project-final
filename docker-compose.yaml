@@ -36,8 +36,6 @@ services:
 
   server:
     build: .
-#      context: ./
-#      dockerfile: Dockerfile
     container_name: jira
     env_file:
       - env.env
