@@ -1,0 +1,68 @@
+version: "2.15.1"
+
+services:
+  nginx: # API Gateway \ Router
+    image: nginx:1.24.0
+    ports:
+      - 80:80
+    volumes:
+      - ./config/nginx.conf:/etc/nginx/conf.d/nginx.conf
+    depends_on:
+      server:
+        condition: service_started
+    restart: always
+
+  db:
+    image: postgres:15.2
+    container_name: postgres_db
+    expose:
+      - 5432
+    networks:
+      - backend_network
+    env_file:
+      - env.env
+    environment:
+      POSTGRES_USER: jira
+      POSTGRES_PASSWORD: JiraRush
+      POSTGRES_DB: jira
+      PGDATA: /var/lib/postgresql/data/pgdata
+    volumes:
+      - -pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -d $${POSTGRES_DB} -U $${POSTGRES_USER}"]
+      interval: 2s
+      timeout: 30s
+      retries: 10
+
+  server:
+    build: .
+#      context: ./
+#      dockerfile: Dockerfile
+    container_name: jira
+    env_file:
+      - env.env
+    environment:
+      DATASOURCE_URL: jdbc:postgresql://postgres:15.2:5432/jira
+      POSTGRES_USER: jira
+      POSTGRES_PASSWORD: JiraRush
+      POSTGRES_DB: jira
+    networks:
+      - frontend_network
+      - backend_network
+    expose:
+      - 8080
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: always
+#    depends_on:
+#      - db
+#      - nginx
+
+volumes:
+  -pgdata:
+networks:
+  backend_network:
+    driver: bridge
+  frontend_network:
+    driver: bridge

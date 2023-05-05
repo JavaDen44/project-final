@@ -10,8 +10,8 @@ app:
 spring:
   datasource:
     url: jdbc:postgresql://localhost:5432/jira
-    username: ${POSTGRES_USER}
-    password: ${POSTGRES_PASSWORD}
+    username: ${DB_USER}
+    password: ${DB_PASSWORD}
   jpa:
     show-sql: true
     open-in-view: false
