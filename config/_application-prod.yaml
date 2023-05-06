@@ -1,9 +1,10 @@
 # template for server
 app:
+  email-confirmation-disabled: true
   host-url: http://localhost
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5432/jira
+    url: jdbc:postgresql://db:5432/jira
     username: jira
     password: JiraRush
 

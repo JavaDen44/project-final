@@ -1,11 +1,13 @@
-FROM maven:3.8.1-openjdk-17-slim AS maven-builder
-RUN mkdir /app
+FROM maven:3.8.1-openjdk-17-slim
 WORKDIR /app
-COPY . /app
+COPY pom.xml .
+COPY src ./src
+COPY resources ./resources
+COPY lombok.config ./lombok.config
+COPY config/_application-prod.yaml ./src/main/resources/application-prod.yaml
 RUN mvn clean package -DskipTests
-
-FROM openjdk:17-jdk-slim
-RUN mkdir /app
-COPY --from=maven-builder app/target/jira-1.0.jar /jira-1.0.jar
+RUN mv ./target/*.jar ./jira.jar
+RUN rm -rf ./target
+RUN rm -rf ./src
 WORKDIR /app
-ENTRYPOINT ["java", "-Dspring.profiles.active=prod", "-jar", "/jira-1.0.jar"]
+ENTRYPOINT ["java", "-jar", "/app/jira.jar", "--spring.profiles.active=prod"]
